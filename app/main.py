@@ -21,24 +21,23 @@ def get_db():
 def main():
     return RedirectResponse(url="/docs")
 
-@app.get('/products/', response_model=List[schemas.Product])
+@app.get('/products/', response_model=List[schemas.ProductGet])
 def show_product(db:Session=Depends(get_db)):
     products = db.query(models.Product).all()
     return products
 
-@app.post('/products/', response_model=schemas.Product)
-def create_product(entrada:schemas.Product,db:Session=Depends(get_db)):
-    with db.begin():
-        new_product = models.Product(product_name=entrada.product_name,
+@app.post('/products/', response_model=schemas.ProductCreate)
+def create_product(entrada:schemas.ProductCreate,db:Session=Depends(get_db)):
+    new_product = models.Product(product_name=entrada.product_name,
                                      description = entrada.description,
                                     product_price=entrada.product_price, 
                                     quantity=entrada.quantity)
-        db.add(new_product)
-        db.commit()
-        db.refresh(new_product)
+    db.add(new_product)
+    db.commit()
+    db.refresh(new_product)
     return new_product
 
-@app.put('/products/{product_id}', response_model=schemas.Product)
+@app.put('/products/{product_id}', response_model=schemas.ProductUpdate)
 def put_product(product_id:int, entrada:schemas.ProductUpdate,db:Session=Depends(get_db)):
     product = db.query(models.Product).filter_by(id=product_id)
     product= models.Product(product_name = entrada.product_name,description = entrada.description, product_price=entrada.product_price, quantity=entrada.quantity)
