@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.params import Depends
 from starlette.responses import RedirectResponse
 from . import models,schemas
@@ -47,8 +47,10 @@ def put_product(product_id:int, entrada:schemas.ProductUpdate,db:Session=Depends
 
 @app.delete('/products/{product_id}', response_model=schemas.Request)
 def delete_product(product_id:int,  db:Session=Depends(get_db)):
-    product = db.query(models.Product).filter_by(id=product_id)
+    product = db.query(models.Product).filter(models.Product.product_id == product_id).first()
+    if product is None:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
     db.delete(product)
-    db.commit
+    db.commit()
     request = schemas.Request(message="Producto eliminado correctamente")
-    return 
+    return request

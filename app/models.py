@@ -3,6 +3,7 @@ from .Conexion import Base
 
 class Product(Base):
     __tablename__  ='product'
+    
     product_id = Column(Integer,primary_key=True,index=True)
     product_name = Column(String(25))
     description = Column(String(30))
