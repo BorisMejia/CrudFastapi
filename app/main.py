@@ -38,10 +38,18 @@ def create_product(entrada:schemas.ProductCreate,db:Session=Depends(get_db)):
     return new_product
 
 @app.put('/products/{product_id}', response_model=schemas.ProductUpdate)
-def put_product(product_id:int, entrada:schemas.ProductUpdate,db:Session=Depends(get_db)):
-    product = db.query(models.Product).filter_by(id=product_id)
-    product= models.Product(product_name = entrada.product_name,description = entrada.description, product_price=entrada.product_price, quantity=entrada.quantity)
-    db.commit
+def update_product(product_id: int, entrada:schemas.ProductUpdate, db: Session = Depends(get_db)):
+    product = db.query(models.Product).filter_by(product_id=product_id).first()
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    product.product_name = entrada.product_name
+    product.description = entrada.description
+    product.product_price = entrada.product_price
+    product.quantity = entrada.quantity
+
+    db.commit()
     db.refresh(product)
     return product
 
