@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-from .Conexion import Base
+from ..Conexion import Base
+from sqlalchemy.orm import relationship
 
 class Product(Base):
     __tablename__  ='product'
@@ -9,6 +10,6 @@ class Product(Base):
     description = Column(String(30))
     product_price = Column(Integer)
     quantity = Column(Integer)
-
-    """category_id = Column(Integer, ForeignKey("category.id"))
-    category = relationship("Category", back_populates="products") """
+    
+    category_id = Column(Integer, ForeignKey('category.category_id'))
+    category = relationship('Category', back_populates='products')

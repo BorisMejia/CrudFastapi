@@ -1,64 +1,39 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.params import Depends
+from fastapi import FastAPI
 from starlette.responses import RedirectResponse
-from . import models,schemas
-from .Conexion import SessionLocal,engine
-from sqlalchemy.orm import Session
-from typing import List
+from .models import Product_models, Category_models
+from .routers import product_routers, category_routers
+from .Conexion import engine
 
-models.Base.metadata.create_all(bind=engine)
+from sqlalchemy.exc import SQLAlchemyError
+
+
+
+#Crear DB
+"""
+
+Product_models.Base.metadata.create_all(bind=engine)
+Category_models.Base.metadata.create_all(bind=engine)
+#"""
+#Reset DB
+#"""
+def reset_database():
+    try:
+            Product_models.Base.metadata.drop_all(bind=engine)  # Elimina todas las tablas
+            Category_models.Base.metadata.drop_all(bind=engine)
+            Product_models.Base.metadata.create_all(bind=engine)  # Vuelve a crear las tablas
+            Category_models.Base.metadata.create_all(bind=engine)  # Vuelve a crear las tablas
+    except SQLAlchemyError as e:
+        print(f"Error al reiniciar la base de datos: {e}")
+
+reset_database()
+#"""
 
 app = FastAPI()
 
-def get_db():
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
+app.include_router(product_routers.router)
+app.include_router(category_routers.router)
 
 @app.get("/")
 def main():
     return RedirectResponse(url="/docs")
 
-@app.get('/products/', response_model=List[schemas.ProductGet])
-def show_product(db:Session=Depends(get_db)):
-    products = db.query(models.Product).all()
-    return products
-
-@app.post('/products/', response_model=schemas.ProductCreate)
-def create_product(entrada:schemas.ProductCreate,db:Session=Depends(get_db)):
-    new_product = models.Product(product_name=entrada.product_name,
-                                     description = entrada.description,
-                                    product_price=entrada.product_price, 
-                                    quantity=entrada.quantity)
-    db.add(new_product)
-    db.commit()
-    db.refresh(new_product)
-    return new_product
-
-@app.put('/products/{product_id}', response_model=schemas.ProductUpdate)
-def update_product(product_id: int, entrada:schemas.ProductUpdate, db: Session = Depends(get_db)):
-    product = db.query(models.Product).filter_by(product_id=product_id).first()
-
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-
-    product.product_name = entrada.product_name
-    product.description = entrada.description
-    product.product_price = entrada.product_price
-    product.quantity = entrada.quantity
-
-    db.commit()
-    db.refresh(product)
-    return product
-
-@app.delete('/products/{product_id}', response_model=schemas.Request)
-def delete_product(product_id:int,  db:Session=Depends(get_db)):
-    product = db.query(models.Product).filter(models.Product.product_id == product_id).first()
-    if product is None:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
-    db.delete(product)
-    db.commit()
-    request = schemas.Request(message="Producto eliminado correctamente")
-    return request
