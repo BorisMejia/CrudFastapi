@@ -9,19 +9,20 @@ from sqlalchemy.exc import SQLAlchemyError
 
 
 #Crear DB
-"""
+#"""
 
 Product_models.Base.metadata.create_all(bind=engine)
 Category_models.Base.metadata.create_all(bind=engine)
 #"""
 #Reset DB
-#"""
+"""
 def reset_database():
     try:
-            Product_models.Base.metadata.drop_all(bind=engine)  # Elimina todas las tablas
+            Product_models.Base.metadata.drop_all(bind=engine)  
             Category_models.Base.metadata.drop_all(bind=engine)
-            Product_models.Base.metadata.create_all(bind=engine)  # Vuelve a crear las tablas
-            Category_models.Base.metadata.create_all(bind=engine)  # Vuelve a crear las tablas
+            
+            Product_models.Base.metadata.create_all(bind=engine)  
+            Category_models.Base.metadata.create_all(bind=engine)  
     except SQLAlchemyError as e:
         print(f"Error al reiniciar la base de datos: {e}")
 

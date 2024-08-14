@@ -1,23 +1,21 @@
-from pydantic import BaseModel
-from typing import Optional, List
-
+from pydantic import BaseModel, Field
 
 class CategoryGet(BaseModel):
-    category_id: int
-    category_name: str
+    category_id: int = Field
+    category_name: str = Field
     
 
     class Config:
         from_attributes = True
 
 class CategoryCreate(BaseModel):
-    category_name: str
+    category_name: str = Field
 
     class Config:
         from_attributes = True
 
 class CategoryUpdate(BaseModel):
-    category_name: Optional[str] = None
+    category_name: str = Field
 
     class Config:
         from_attributes = True
